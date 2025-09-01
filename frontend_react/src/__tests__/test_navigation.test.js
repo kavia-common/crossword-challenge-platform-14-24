@@ -1,10 +1,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import App from '../../src/App';
+import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { AuthContext } from '../../src/context/AuthContext';
+import Header from '../../src/components/Header';
+import PlayPage from '../../src/pages/PlayPage';
 
-function renderAppWithUser(user = null, route = '/') {
+function renderWithAuth(user = null, route = '/') {
   const value = {
     user,
     isAdmin: !!user?.is_admin,
@@ -17,14 +18,17 @@ function renderAppWithUser(user = null, route = '/') {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <AuthContext.Provider value={value}>
-        <App />
+        <Header theme="light" onToggleTheme={() => {}} colors={{ primary: '#000', secondary: '#00f', accent: '#f90' }} />
+        <Routes>
+          <Route path="/" element={<PlayPage />} />
+        </Routes>
       </AuthContext.Provider>
     </MemoryRouter>
   );
 }
 
 test('shows navigation links and admin only when admin', () => {
-  renderAppWithUser({ username: 'u', is_admin: true });
+  renderWithAuth({ username: 'u', is_admin: true });
 
   // Brand + links
   expect(screen.getByText(/Crossword Challenge/i)).toBeInTheDocument();
@@ -34,6 +38,6 @@ test('shows navigation links and admin only when admin', () => {
 });
 
 test('non-admin does not see admin link', () => {
-  renderAppWithUser({ username: 'u', is_admin: false });
+  renderWithAuth({ username: 'u', is_admin: false });
   expect(screen.queryByText(/Admin/i)).not.toBeInTheDocument();
 });
