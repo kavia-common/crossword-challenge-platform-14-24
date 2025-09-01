@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import './App.css';
+import { AuthProvider } from './context/AuthContext';
+import Header from './components/Header';
+import ScrollToTop from './components/ScrollToTop';
+import PlayPage from './pages/PlayPage';
+import LeaderboardPage from './pages/LeaderboardPage';
+import AdminPage from './pages/AdminPage';
+import LoginPage from './pages/LoginPage';
 
 // PUBLIC_INTERFACE
 function App() {
+  /**
+   * App root: handles theming and top-level routing.
+   */
   const [theme, setTheme] = useState('light');
 
-  // Effect to apply theme to document element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
@@ -16,32 +25,31 @@ function App() {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
   };
 
+  const colors = useMemo(() => ({
+    primary: '#1a237e',
+    secondary: '#64b5f6',
+    accent: '#ffb300'
+  }), []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <BrowserRouter>
+        <AuthProvider>
+          <ScrollToTop />
+          <Header theme={theme} onToggleTheme={toggleTheme} colors={colors} />
+          <main style={{ maxWidth: 1200, margin: '0 auto', padding: 16 }}>
+            <Routes>
+              <Route path="/" element={<PlayPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/login" element={<LoginPage />} />
+            </Routes>
+          </main>
+          <footer style={{ padding: 16, color: '#666', borderTop: '1px solid #e9ecef' }}>
+            <small>Crossword Challenge • Powered by React</small>
+          </footer>
+        </AuthProvider>
+      </BrowserRouter>
     </div>
   );
 }
